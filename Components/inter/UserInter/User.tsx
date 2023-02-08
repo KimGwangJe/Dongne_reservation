@@ -34,7 +34,7 @@ function User({ route, navigation }: any) {
         </View>
       </View>
       <View style={{ borderWidth: 1 }}></View>
-      <ChooseOne navigation={navigation} />
+      <ChooseOne navigation={navigation} route={route} />
     </View>
   );
 }

@@ -14,16 +14,54 @@ import { Ionicons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 
 function Search({ route, navigation }: any) {
-  const [view, setview]: any = useState([]);
-  useEffect(() => {
-    Axios.get("http://localhost:8080/onerRestaurant").then((response) => {
-      setview(response.data); //데이터 받아옴
-    });
-  });
-
   const [text, onChangeText] = useState("");
 
   const searchresult = () => {
+    const [view, setview]: any = useState([]);
+    let [user, setuser]: any = useState([]);
+    let [plz, setplz]: any = useState(false);
+    const [udata, setudata] = useState({
+      num: 0,
+      id: "",
+      point: "",
+      reservation: "",
+      name: "",
+      lovinglist: route.params.lovinglist,
+    });
+
+    const curuser = () => {
+      user.map((user: any) => {
+        if (user.id === route.params.id) {
+          setudata({
+            num: user.num,
+            id: user.id,
+            point: user.point,
+            reservation: user.reservation,
+            name: user.name,
+            lovinglist: user.lovinglist,
+          });
+        }
+      });
+    };
+
+    const getuser = async () => {
+      const posts = await Axios.get("http://localhost:8080/user");
+      setuser(posts.data);
+    };
+
+    const getres = async () => {
+      const posts = await Axios.get("http://localhost:8080/onerRestaurant");
+      setview(posts.data);
+    };
+
+    useEffect(() => {
+      getuser();
+      getres();
+      curuser();
+    }, [plz]);
+    const a = udata.lovinglist;
+    const b = JSON.parse(a);
+
     const filtered = view.filter((view: any) => {
       return view.name.toUpperCase().includes(text.toUpperCase());
     });
@@ -52,6 +90,109 @@ function Search({ route, navigation }: any) {
       })
         .then((res) => res.json())
         .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+    };
+
+    const updatetablenum = () => {
+      const menu = {
+        tablenum: visibleMoal.tablenum - 1,
+        name: visibleMoal.name,
+        dong: visibleMoal.dong,
+      };
+      fetch("http://localhost:8080/updatetablenum", {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(menu),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+    };
+
+    const increseloving = (vi: any) => {
+      const loving = {
+        name: vi.name,
+        dong: vi.dong,
+        loving: vi.loving + 1,
+      };
+      fetch("http://localhost:8080/updateloving", {
+        method: "PUT", // 업데이트
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(loving),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+      console.log(loving.loving);
+    };
+    const addlovinglist = (vi: any) => {
+      const lovinglist = {
+        num: route.params.num,
+        dong: vi.dong,
+        name: vi.name,
+      };
+      fetch("http://localhost:8080/updatelovinglist", {
+        method: "PUT", // 업데이트
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(lovinglist),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+    };
+
+    const decreaseloving = (vi: any) => {
+      const loving = {
+        name: vi.name,
+        dong: vi.dong,
+        loving: vi.loving - 1,
+      };
+      fetch("http://localhost:8080/updateloving", {
+        method: "PUT", // 업데이트
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(loving),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+      console.log(loving.loving);
+    };
+    const dellovinglist = (vi: any) => {
+      const deletelovinglist = {
+        num: route.params.num,
+        dong: vi.dong,
+        name: vi.name,
+      };
+      fetch("http://localhost:8080/deletelovinglist", {
+        method: "PUT", // 업데이트
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(deletelovinglist),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
     };
 
     return (
@@ -110,69 +251,17 @@ function Search({ route, navigation }: any) {
                   <TouchableOpacity
                     style={{ flexDirection: "row", alignItems: "center" }}
                     onPress={() => {
-                      const a = JSON.parse(route.params.lovinglist);
-                      const includekey = Object.keys(a).includes(view.name);
+                      const includekey = Object.keys(b).includes(view.name);
+                      console.log(includekey);
                       if (includekey !== true) {
                         //귀찮,,, 값 없으면 실행해!
-                        const loving = {
-                          name: view.name,
-                          dong: view.dong,
-                          loving: view.loving + 1,
-                        };
-                        fetch("http://localhost:8080/updateloving", {
-                          method: "PUT", // 업데이트
-                          headers: {
-                            "content-type": "application/json",
-                          },
-                          body: JSON.stringify(loving),
-                        })
-                          .then((res) => res.json())
-                          .then((json) => {});
-
-                        const lovinglist = {
-                          num: route.params.num,
-                          dong: view.dong,
-                          name: view.name,
-                        };
-                        fetch("http://localhost:8080/updatelovinglist", {
-                          method: "PUT", // 업데이트
-                          headers: {
-                            "content-type": "application/json",
-                          },
-                          body: JSON.stringify(lovinglist),
-                        })
-                          .then((res) => res.json())
-                          .then((json) => {});
+                        addlovinglist(view);
+                        increseloving(view);
+                        setplz(!plz);
                       } else {
-                        const loving = {
-                          name: view.name,
-                          dong: view.dong,
-                          loving: view.loving - 1,
-                        };
-                        fetch("http://localhost:8080/updateloving", {
-                          method: "PUT", // 업데이트
-                          headers: {
-                            "content-type": "application/json",
-                          },
-                          body: JSON.stringify(loving),
-                        })
-                          .then((res) => res.json())
-                          .then((json) => {});
-
-                        const deletelovinglist = {
-                          num: route.params.num,
-                          dong: view.dong,
-                          name: view.name,
-                        };
-                        fetch("http://localhost:8080/deletelovinglist", {
-                          method: "PUT", // 업데이트
-                          headers: {
-                            "content-type": "application/json",
-                          },
-                          body: JSON.stringify(deletelovinglist),
-                        })
-                          .then((res) => res.json())
-                          .then((json) => {});
+                        dellovinglist(view);
+                        decreaseloving(view);
+                        setplz(!plz);
                       }
                     }}
                   >
@@ -235,40 +324,9 @@ function Search({ route, navigation }: any) {
                 </Text>
                 <View style={styles.lineStyle} />
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      const loving = {
-                        name: visibleMoal.name,
-                        dong: visibleMoal.dong,
-                        loving: visibleMoal.loving + 1,
-                      };
-                      fetch("http://localhost:8080/updateloving", {
-                        method: "PUT", // 업데이트
-                        headers: {
-                          "content-type": "application/json",
-                        },
-                        body: JSON.stringify(loving),
-                      })
-                        .then((res) => res.json())
-                        .then((json) => {});
-
-                      const lovinglist = {
-                        name: visibleMoal.name,
-                        dong: visibleMoal.dong,
-                      };
-                      fetch("http://localhost:8080/updateloving", {
-                        method: "PUT", // 업데이트
-                        headers: {
-                          "content-type": "application/json",
-                        },
-                        body: JSON.stringify(loving),
-                      })
-                        .then((res) => res.json())
-                        .then((json) => {});
-                    }}
-                  >
+                  <View>
                     <Ionicons name="heart-outline" size={24} color="black" />
-                  </TouchableOpacity>
+                  </View>
                   <Text style={{ fontSize: 18 }}>{visibleMoal.loving}</Text>
                 </View>
                 <View style={styles.lineStyle} />
@@ -279,7 +337,14 @@ function Search({ route, navigation }: any) {
                 <View style={styles.lineStyle} />
                 <TouchableOpacity
                   onPress={() => {
-                    updatereservation();
+                    if (udata.reservation === "") {
+                      updatereservation();
+                      updatetablenum();
+                    } else {
+                      alert(
+                        "이미 예약 한 가게가 있습니다.\n 취소 후 이용 해 주세요"
+                      );
+                    }
                     setVisibleModal({
                       mode: false,
                       name: "",
@@ -302,6 +367,9 @@ function Search({ route, navigation }: any) {
             </View>
           </Modal>
         </SafeAreaView>
+        <Text></Text>
+        <Text></Text>
+        <Text></Text>
         <Text></Text>
         <Text></Text>
         <Text></Text>

@@ -7,20 +7,70 @@ import {
   Image,
   SafeAreaView,
   Modal,
+  RefreshControl,
 } from "react-native";
 import Axios from "axios";
-import { ScrollView, TextInput } from "react-native-gesture-handler";
+import { ScrollView } from "react-native-gesture-handler";
 import { Ionicons } from "@expo/vector-icons";
 import { Feather } from "@expo/vector-icons";
 import { Entypo } from "@expo/vector-icons";
 
 function Like({ route, navigation }: any) {
-  const [view, setview]: any = useState([]);
-  useEffect(() => {
-    Axios.get("http://localhost:8080/onerRestaurant").then((response) => {
-      setview(response.data); //데이터 받아옴
-    });
+  const [refreshing, setRefreshing] = React.useState(false);
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
   }, []);
+  const [view, setview]: any = useState([]);
+  const [user, setuser]: any = useState([]);
+  const [plz, setplz]: any = useState(false);
+  const [udata, setudata] = useState({
+    num: 0,
+    id: "",
+    point: "",
+    reservation: "",
+    name: "",
+    lovinglist: route.params.lovinglist,
+  });
+
+  const curuser = async () => {
+    const a = await Promise.all(
+      user.map((user: any) => {
+        if (user.id === route.params.id) {
+          setudata({
+            num: user.num,
+            id: user.id,
+            point: user.point,
+            reservation: user.reservation,
+            name: user.name,
+            lovinglist: user.lovinglist,
+          });
+        }
+      })
+    );
+  };
+
+  const getuser = async () => {
+    await Axios.get("http://localhost:8080/user").then((res) =>
+      setuser(res.data)
+    );
+  };
+
+  const getres = async () => {
+    await Axios.get("http://localhost:8080/onerRestaurant").then((res) =>
+      setview(res.data)
+    );
+  };
+
+  useEffect(() => {
+    getuser();
+    getres();
+    curuser();
+  }, []);
+  const a = udata.lovinglist;
+  const b = JSON.parse(a);
 
   const searchresult = () => {
     const [visibleMoal, setVisibleModal] = useState({
@@ -49,15 +99,111 @@ function Like({ route, navigation }: any) {
         .then((json) => {});
     };
 
+    const updatetablenum = () => {
+      const menu = {
+        tablenum: visibleMoal.tablenum - 1,
+        name: visibleMoal.name,
+        dong: visibleMoal.dong,
+      };
+      fetch("http://localhost:8080/updatetablenum", {
+        method: "PUT",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(menu),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+    };
+
+    const increseloving = (vi: any) => {
+      const loving = {
+        name: vi.name,
+        dong: vi.dong,
+        loving: vi.loving + 1,
+      };
+      fetch("http://localhost:8080/updateloving", {
+        method: "PUT", // 업데이트
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(loving),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+    };
+    const addlovinglist = (vi: any) => {
+      const lovinglist = {
+        num: route.params.num,
+        dong: vi.dong,
+        name: vi.name,
+      };
+      fetch("http://localhost:8080/updatelovinglist", {
+        method: "PUT", // 업데이트
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(lovinglist),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+    };
+
+    const decreaseloving = (vi: any) => {
+      const loving = {
+        name: vi.name,
+        dong: vi.dong,
+        loving: vi.loving - 1,
+      };
+      fetch("http://localhost:8080/updateloving", {
+        method: "PUT", // 업데이트
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(loving),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+    };
+    const dellovinglist = (vi: any) => {
+      const deletelovinglist = {
+        num: route.params.num,
+        dong: vi.dong,
+        name: vi.name,
+      };
+      fetch("http://localhost:8080/deletelovinglist", {
+        method: "PUT", // 업데이트
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify(deletelovinglist),
+      })
+        .then((res) => res.json())
+        .then((json) => {});
+      getuser();
+      getres();
+      setplz(!plz);
+    };
+
     return (
       <View>
         <View>
           {view.map((view: any) => {
-            const Jsonlovinglist = JSON.parse(route.params.lovinglist);
-            const key1 = Object.keys(Jsonlovinglist);
+            const key1: any = Object.keys(b);
             for (let i = 0; i < key1.length; i++) {
-              var key = key1[i];
-              if (view.name === key1[i] || view.dong === Jsonlovinglist[key]) {
+              if (view.name === key1[i] && view.dong === b[key1[i]]) {
                 return (
                   <TouchableOpacity
                     style={styles.box}
@@ -110,69 +256,21 @@ function Like({ route, navigation }: any) {
                       <TouchableOpacity
                         style={{ flexDirection: "row", alignItems: "center" }}
                         onPress={() => {
-                          const a = JSON.parse(route.params.lovinglist);
-                          const includekey = Object.keys(a).includes(view.name);
+                          const includekey = Object.keys(b).includes(view.name);
                           if (includekey !== true) {
-                            //귀찮,,, 값 없으면 실행해!
-                            const loving = {
-                              name: view.name,
-                              dong: view.dong,
-                              loving: view.loving + 1,
-                            };
-                            fetch("http://localhost:8080/updateloving", {
-                              method: "PUT", // 업데이트
-                              headers: {
-                                "content-type": "application/json",
-                              },
-                              body: JSON.stringify(loving),
-                            })
-                              .then((res) => res.json())
-                              .then((json) => {});
-
-                            const lovinglist = {
-                              num: route.params.num,
-                              dong: view.dong,
-                              name: view.name,
-                            };
-                            fetch("http://localhost:8080/updatelovinglist", {
-                              method: "PUT", // 업데이트
-                              headers: {
-                                "content-type": "application/json",
-                              },
-                              body: JSON.stringify(lovinglist),
-                            })
-                              .then((res) => res.json())
-                              .then((json) => {});
-                          } else {
-                            const loving = {
-                              name: view.name,
-                              dong: view.dong,
-                              loving: view.loving - 1,
-                            };
-                            fetch("http://localhost:8080/updateloving", {
-                              method: "PUT", // 업데이트
-                              headers: {
-                                "content-type": "application/json",
-                              },
-                              body: JSON.stringify(loving),
-                            })
-                              .then((res) => res.json())
-                              .then((json) => {});
-
-                            const deletelovinglist = {
-                              num: route.params.num,
-                              dong: view.dong,
-                              name: view.name,
-                            };
-                            fetch("http://localhost:8080/deletelovinglist", {
-                              method: "PUT", // 업데이트
-                              headers: {
-                                "content-type": "application/json",
-                              },
-                              body: JSON.stringify(deletelovinglist),
-                            })
-                              .then((res) => res.json())
-                              .then((json) => {});
+                            const includekey = Object.keys(b).includes(
+                              view.name
+                            );
+                            if (includekey !== true) {
+                              //귀찮,,, 값 없으면 실행해!
+                              addlovinglist(view);
+                              increseloving(view);
+                              setplz(!plz);
+                            } else {
+                              dellovinglist(view);
+                              decreaseloving(view);
+                              setplz(!plz);
+                            }
                           }
                         }}
                       >
@@ -267,7 +365,7 @@ function Like({ route, navigation }: any) {
                         headers: {
                           "content-type": "application/json",
                         },
-                        body: JSON.stringify(loving),
+                        body: JSON.stringify(lovinglist),
                       })
                         .then((res) => res.json())
                         .then((json) => {});
@@ -285,7 +383,14 @@ function Like({ route, navigation }: any) {
                 <View style={styles.lineStyle} />
                 <TouchableOpacity
                   onPress={() => {
-                    updatereservation();
+                    if (udata.reservation === "") {
+                      updatereservation();
+                      updatetablenum();
+                    } else {
+                      alert(
+                        "이미 예약 한 가게가 있습니다.\n 취소 후 이용 해 주세요"
+                      );
+                    }
                     setVisibleModal({
                       mode: false,
                       name: "",
@@ -395,6 +500,12 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     textAlign: "center",
     color: "white",
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: "pink",
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
 

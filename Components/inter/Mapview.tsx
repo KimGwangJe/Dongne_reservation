@@ -83,6 +83,23 @@ function Home({ route, navigation }: any) {
       .then((json) => {});
   };
 
+  const updatetablenum = () => {
+    const menu = {
+      tablenum: visibleMoal.tablenum - 1,
+      name: visibleMoal.name,
+      dong: visibleMoal.dong,
+    };
+    fetch("http://localhost:8080/updatetablenum", {
+      method: "PUT",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(menu),
+    })
+      .then((res) => res.json())
+      .then((json) => {});
+  };
+
   // renders
   return (
     <View style={styles.container}>
@@ -218,6 +235,13 @@ function Home({ route, navigation }: any) {
               <TouchableOpacity
                 onPress={() => {
                   updatereservation();
+                  if (route.params.reservation === "") {
+                    updatetablenum();
+                  } else {
+                    alert(
+                      "이미 예약 한 가게가 있습니다.\n 취소 후 이용 해 주세요"
+                    );
+                  }
                   setVisibleModal({
                     mode: false,
                     name: "",

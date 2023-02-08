@@ -19,6 +19,7 @@ import Credit from "./Components/inter/UserInter/UserMenu/Credit";
 import Coupon from "./Components/inter/UserInter/UserMenu/Coupon";
 import Point from "./Components/inter/UserInter/UserMenu/Point";
 import Present from "./Components/inter/UserInter/UserMenu/Present";
+import ReserHis from "./Components/inter/UserInter/UserMenu/ReserHis";
 
 const Stack = createStackNavigator();
 
@@ -65,6 +66,7 @@ function StackNavigation() {
           headerShown: false,
         }}
       />
+
       <Stack.Screen
         name="Korea"
         component={Korea}
@@ -132,6 +134,11 @@ function StackNavigation() {
         name="Present"
         component={Present}
         options={{ title: "Present", headerShown: false }}
+      />
+      <Stack.Screen
+        name="ReservationHistory"
+        component={ReserHis}
+        options={{ title: "ReservationHistory", headerShown: false }}
       />
     </Stack.Navigator>
   );

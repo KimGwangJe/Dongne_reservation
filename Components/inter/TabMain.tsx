@@ -27,6 +27,7 @@ function TabMain({ route }: any) {
           tabBarIcon: () => (
             <Ionicons name="home-outline" size={24} color="black" />
           ),
+          unmountOnBlur: true,
         }}
         initialParams={{
           num: route.params.num,
@@ -43,6 +44,7 @@ function TabMain({ route }: any) {
         options={{
           title: "",
           tabBarIcon: () => <Ionicons name="search" size={24} color="black" />,
+          unmountOnBlur: true,
         }}
         initialParams={{
           num: route.params.num,
@@ -59,6 +61,7 @@ function TabMain({ route }: any) {
         options={{
           title: "",
           tabBarIcon: () => <Entypo name="map" size={24} color="black" />,
+          unmountOnBlur: true,
         }}
         initialParams={{
           num: route.params.num,
@@ -78,6 +81,7 @@ function TabMain({ route }: any) {
           tabBarIcon: () => (
             <Ionicons name="heart-outline" size={24} color="black" />
           ),
+          unmountOnBlur: true,
         }}
         initialParams={{
           num: route.params.num,
@@ -94,6 +98,7 @@ function TabMain({ route }: any) {
         options={{
           title: "",
           tabBarIcon: () => <Feather name="user" size={24} color="black" />,
+          unmountOnBlur: true,
         }}
         initialParams={{
           num: route.params.num,

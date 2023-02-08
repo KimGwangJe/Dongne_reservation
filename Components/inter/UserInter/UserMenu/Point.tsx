@@ -24,6 +24,13 @@ function Point({ route, navigation }: any) {
           />
         </View>
       </View>
+      <View>
+        <View style={{ flexDirection: "row", justifyContent: "center" }}>
+          <Text style={{ fontSize: 27, marginTop: 25 }}>
+            {route.params.route.point} P
+          </Text>
+        </View>
+      </View>
     </View>
   );
 }

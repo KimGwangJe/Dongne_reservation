@@ -19,7 +19,7 @@ function Chooseone({ route, navigation }: any) {
         <TouchableOpacity
           style={{ height: 80, marginTop: 50, width: "50%" }}
           onPress={() => {
-            navigation.navigate("Point");
+            navigation.navigate("Point", { route: route.params });
           }}
         >
           <View
@@ -39,7 +39,7 @@ function Chooseone({ route, navigation }: any) {
         <TouchableOpacity
           style={{ height: 80, marginTop: 50, width: "50%" }}
           onPress={() => {
-            navigation.navigate("Coupon");
+            navigation.navigate("Coupon", { route: route.params });
           }}
         >
           <View
@@ -59,7 +59,7 @@ function Chooseone({ route, navigation }: any) {
         <TouchableOpacity
           style={{ height: 80, marginTop: 20, width: "50%" }}
           onPress={() => {
-            navigation.navigate("Present");
+            navigation.navigate("Present", { route: route.params });
           }}
         >
           <View
@@ -79,7 +79,7 @@ function Chooseone({ route, navigation }: any) {
         <TouchableOpacity
           style={{ height: 80, marginTop: 20, width: "50%" }}
           onPress={() => {
-            navigation.navigate("Credit");
+            navigation.navigate("Credit", { route: route.params });
           }}
         >
           <View
@@ -94,6 +94,28 @@ function Chooseone({ route, navigation }: any) {
               style={{ alignSelf: "center" }}
             />
             <Text style={{ fontSize: 15, textAlign: "center" }}>Credit</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={{ height: 80, marginTop: 20, width: "50%" }}
+          onPress={() => {
+            navigation.navigate("ReservationHistory", { route: route.params });
+          }}
+        >
+          <View
+            style={{
+              marginTop: 5,
+            }}
+          >
+            <Text
+              style={{ fontSize: 40, alignSelf: "center", textAlign: "center" }}
+            >
+              🤙🏽
+            </Text>
+
+            <Text style={{ fontSize: 15, textAlign: "center" }}>
+              Reservation
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
