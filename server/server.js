@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const mysql = require("mysql");
 
 var connection = mysql.createConnection({
-  host: "",
+  host: "localhost",
   user: "",
   password: "",
   database: "",
@@ -26,6 +26,7 @@ app.get("/user", (req, res) => {
     }
   });
 });
+
 app.get("/oner", (req, res) => {
   connection.query("SELECT * FROM oner", function (err, rows, fields) {
     if (err) {
@@ -56,7 +57,19 @@ app.get("/map", (req, res) => {
         res.send("실패");
       } else {
         res.send(rows);
-        console.log(rows);
+      }
+    }
+  );
+});
+
+app.get("/card", (req, res) => {
+  connection.query(
+    "SELECT card.id, card.bank, card.cardname, card.username, card.balance FROM card",
+    function (err, rows, fields) {
+      if (err) {
+        res.send("실패");
+      } else {
+        res.send(rows);
       }
     }
   );
@@ -125,16 +138,27 @@ app.post("/createrestaurant", (req, res) => {
   );
 });
 
-// app.get("/select", (req, res) => {
-//   connection.query("SELECT * FROM todo", function (err, rows, fields) {
-//     if (err) {
-//       console.log(err);
-//       // console.log(err);
-//     } else {
-//       return res.send(rows);
-//     }
-//   });
-// });
+app.post("/createcard", (req, res) => {
+  const bank = req.body.bank;
+  const cardname = req.body.cardname;
+  const username = req.body.username;
+  const cardnum = req.body.cardnum;
+  const password = req.body.password;
+  const cvc = req.body.cvc;
+  const balance = req.body.balance;
+
+  connection.query(
+    "INSERT INTO card (cardname, bank, username,cardnum,password,cvc,balance) values (?,?,?,?,?,?,?)",
+    [cardname, bank, username, cardnum, password, cvc, balance],
+    function (err, rows, fields) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("성공");
+      }
+    }
+  );
+});
 
 app.put("/updatelovinglist", (req, res) => {
   const name = req.body.name;
@@ -194,8 +218,7 @@ app.put("/updatereservation", (req, res) => {
     [reservation, id],
     function (err, rows, fields) {
       if (err) {
-        console.log(reservation);
-        console.log(id);
+        console.log(err);
       } else {
         console.log("성공");
       }
@@ -203,20 +226,53 @@ app.put("/updatereservation", (req, res) => {
   );
 });
 
-// app.delete("/deletelovinglist", (req, res) => {
-//   const num = req.body.num;
-//   connection.query(
-//     "DELETE FROM user WHERE num = ?",
-//     [num],
-//     function (err, rows, fields) {
-//       if (err) {
-//         console.log(err);
-//       } else {
-//         console.log(num);
-//       }
-//     }
-//   );
-// });
+app.put("/updatetablenum", (req, res) => {
+  const tablenum = req.body.tablenum;
+  const name = req.body.name;
+  const dong = req.body.dong;
+  connection.query(
+    "UPDATE restaurant SET tablenum = ? WHERE name = ? && dong = ?",
+    [tablenum, name, dong],
+    function (err, rows, fields) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("성공");
+      }
+    }
+  );
+});
+
+app.put("/delreser", (req, res) => {
+  const reservation = "";
+  const id = req.body.id;
+  connection.query(
+    "UPDATE user SET reservation = ? WHERE id = ?",
+    [reservation, id],
+    function (err, rows, fields) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log("성공");
+      }
+    }
+  );
+});
+
+app.delete("/deletecard", (req, res) => {
+  const id = req.body.id;
+  connection.query(
+    "DELETE FROM card WHERE id = ?",
+    [id],
+    function (err, rows, fields) {
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(id);
+      }
+    }
+  );
+});
 
 app.listen(port, () => {
   console.log(`Connect at http://localhost:${port}`);
